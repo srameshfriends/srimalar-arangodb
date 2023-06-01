@@ -6,7 +6,13 @@
 * The transaction life cycle manually need to be call (commitStreamTransaction) or (abortStreamTransaction)
 * Make sure the operation will be completed otherwise it will cause unknown issues of your database transactions.
 
-##### 2023-04-30 
+##### 2023-06-01
+
+- Spring web dependency added
+- Message property, message exception, error model added.
+- update CRUD classes.
+
+##### 2023-04-30
 
 Version 1.0
 

@@ -4,18 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ArangodbQueryBuilder {
-    private final Class<? extends ArangoEntity> type;
+    private final Class<?> type;
     private final StringBuilder builder;
     private final Map<String, Object> parameters;
 
-    public ArangodbQueryBuilder(Class<? extends ArangoEntity> type) {
+    public ArangodbQueryBuilder(Class<?> type) {
         this.type = type;
         this.builder = new StringBuilder("FOR ");
         this.parameters = new HashMap<>();
-
+        collection(ArangodbFactory.getCollectionName(type));
     }
 
-    public Class<? extends ArangoEntity> getType() {
+    public Class<?> getType() {
         return type;
     }
 

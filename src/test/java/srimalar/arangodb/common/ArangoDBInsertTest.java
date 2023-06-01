@@ -5,11 +5,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.LinkedList;
-import java.util.function.BiConsumer;
-
 public class ArangoDBInsertTest {
-    private static ArangodbTransaction transaction;
+    private static ArangodbExecutor transaction;
     private static int errorCount = 2;
 
     @BeforeAll
@@ -19,29 +16,33 @@ public class ArangoDBInsertTest {
                 .user("root")
                 .password("root")
                 .build();
-        transaction = new ArangodbTransaction();
-        transaction.setDatabase(arangoDB.db("test"));
+        transaction = new ArangodbExecutor();
+        ArangodbAuditLog auditLog = new ArangodbAuditLog();
+        auditLog.setLogDatabase(arangoDB.db("test_aa"));
+        transaction.setDatabase(arangoDB.db("test_mm"), auditLog);
         errorCount -= 1;
     }
 
     @Test
     public void insert() {
-        /*System.out.println(" ----------------- INSERT CREATED ---------------- ");
-        MessageProperty property = ArangoDBTest.create();
-        System.out.println(property);
-
+   /*     System.out.println(" ----------------- INSERT CREATED ---------------- ");
+        AuditLog auditLog = new AuditLog();
+        auditLog.setCreatedOn(LocalDateTime.now());
+        auditLog.setCreatedBy("Kashvika");
+        auditLog.setAct("U");
+        auditLog.setRef("2053492");*/
+        //
+        MessageProperty property = new MessageProperty();
+        property.setLocale("en");
+        property.setValue("Audit Log");
+        property.setName("auditLog");/*
+        property.setKey("2053492");
+        property.setId("messages/2053492");
+        property.setRev("_f9Ep3Ju---");*/
+        //
         MessageProperty entity = transaction.insert(property);
         System.out.println(" ----------------- INSERTED ---------------- ");
         System.out.println(entity);
-
-        ArangoAuditLog arangoAuditLog = transaction.getAuditLogEvent();
-        System.out.println(" ----------------- INSERT AUDIT ---------------- ");
-        arangoAuditLog.getInsertMap().forEach(new BiConsumer<String, LinkedList<Object>>() {
-            @Override
-            public void accept(String s, LinkedList<Object> objects) {
-                System.out.println(objects.get(0));
-            }
-        });*/
         errorCount -= 1;
     }
 

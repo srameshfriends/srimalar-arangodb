@@ -1,5 +1,7 @@
 package srimalar.arangodb.common;
 
+import srimalar.arangodb.util.CommonConstant;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -107,8 +109,6 @@ public class ToStringBuilder {
     public ToStringBuilder bigDecimal(String name, BigDecimal value) {
         return value != null ? addValue(name, value.toString()) : zero(name);
     }
-
-
 
     public ToStringBuilder doubleValue(String name, Double value) {
         return value != null ? addValue(name, value.toString()) : zero(name);

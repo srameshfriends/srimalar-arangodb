@@ -90,7 +90,7 @@ public class ArangodbFactory {
 
     @SuppressWarnings("unchecked")
     public static <T> T getNewInstance(DocumentEntity entity, Object obj) {
-        if(obj instanceof ArangoEntity arangoEntity) {
+        if (obj instanceof ArangodbEntity arangoEntity) {
             arangoEntity.setId(entity.getId());
             arangoEntity.setKey(entity.getKey());
             arangoEntity.setRev(entity.getRev());

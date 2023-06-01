@@ -1,11 +1,13 @@
 package srimalar.arangodb.common;
 
-import com.arangodb.serde.jackson.*;
+import com.arangodb.serde.jackson.Id;
+import com.arangodb.serde.jackson.Key;
+import com.arangodb.serde.jackson.Rev;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Objects;
 
-public abstract class ArangoEntity implements EntityIdentity {
+public abstract class ArangodbEntity implements EntityIdentity {
     @Id
     private String id;
     @Key
@@ -13,10 +15,10 @@ public abstract class ArangoEntity implements EntityIdentity {
     @Rev
     private String rev;
 
-    public ArangoEntity() {
+    public ArangodbEntity() {
     }
 
-    public ArangoEntity(String key, String id, String rev) {
+    public ArangodbEntity(String key, String id, String rev) {
         this.key = key;
         this.id = id;
         this.rev = rev;
@@ -56,7 +58,7 @@ public abstract class ArangoEntity implements EntityIdentity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ArangoEntity that = (ArangoEntity) o;
+        ArangodbEntity that = (ArangodbEntity) o;
         if (id == null || that.id == null) return false;
         return id.equals(that.id);
     }

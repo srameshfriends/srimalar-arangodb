@@ -5,13 +5,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.BiConsumer;
-
 public class ArangoDBInsertListTest {
-    private static ArangodbTransaction transaction;
+    private static ArangodbExecutor transaction;
     private static int errorCount = 2;
 
     @BeforeAll
@@ -21,8 +16,10 @@ public class ArangoDBInsertListTest {
                 .user("root")
                 .password("root")
                 .build();
-        transaction = new ArangodbTransaction();
-        transaction.setDatabase(arangoDB.db("test"));
+        transaction = new ArangodbExecutor();
+        ArangodbAuditLog auditLog = new ArangodbAuditLog();
+        auditLog.setLogDatabase(arangoDB.db("test_aa"));
+        transaction.setDatabase(arangoDB.db("test_mm"), auditLog);
         errorCount -= 1;
     }
 

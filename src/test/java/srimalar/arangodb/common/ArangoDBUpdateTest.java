@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class ArangoDBUpdateTest {
-    private static ArangodbTransaction transaction;
+    private static ArangodbExecutor transaction;
     private static int errorCount = 2;
 
     @BeforeAll
@@ -16,24 +16,22 @@ public class ArangoDBUpdateTest {
                 .user("root")
                 .password("root")
                 .build();
-        transaction = new ArangodbTransaction();
-        transaction.setDatabase(arangoDB.db("test"));
+        transaction = new ArangodbExecutor();
+        ArangodbAuditLog auditLog = new ArangodbAuditLog();
+        auditLog.setLogDatabase(arangoDB.db("test_aa"));
+        transaction.setDatabase(arangoDB.db("test_mm"), auditLog);
         errorCount -= 1;
     }
 
     @Test
     public void updateTest() {
-        /*System.out.println(" ----------------- UPDATE ---------------- ");
-        MessageProperty property = ArangoDBTest.getInstance("2049260", null);
+        System.out.println(" ----------------- UPDATE ---------------- ");
+        MessageProperty property = ArangoDBTest.getInstance("2151940", null);
+        property.setValue("This is Thirunallar Temple");
+        property.setName("thirunallar");
         MessageProperty entity = transaction.update(property);
         System.out.println(entity);
         System.out.println(" ----------------- AUDIT ---------------- ");
-        transaction.getAuditLogEvent().getUpdateMap().forEach(new BiConsumer<String, LinkedList<Object>>() {
-            @Override
-            public void accept(String s, LinkedList<Object> objects) {
-                objects.forEach(System.out::println);
-            }
-        });*/
         errorCount -= 1;
     }
 

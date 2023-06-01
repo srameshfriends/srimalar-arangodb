@@ -10,6 +10,7 @@ import io.vertx.core.impl.ConcurrentHashSet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import srimalar.arangodb.util.CommonConstant;
 
 import java.io.IOException;
 import java.util.*;
@@ -30,27 +31,28 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @Scope(value = CommonConstant.SCOPE_REQUEST)
-public class ArangodbTransaction {
-    private final ArangoAuditLog auditLogEvent;
+public class ArangodbExecutor {
     private final ConcurrentHashSet<StreamTransactionSet> transactionSet;
     private ArangoDatabase database;
     private boolean isCancelTransaction;
 
-    public ArangodbTransaction() {
+    private ArangodbAuditLog auditLog;
+
+    public ArangodbExecutor() {
         transactionSet = new ConcurrentHashSet<>();
-        auditLogEvent = new ArangoAuditLog();
     }
 
-    public void setDatabase(ArangoDatabase database) {
+    public void setDatabase(ArangoDatabase database, ArangodbAuditLog auditLog) {
         this.database = database;
         if (!database.exists()) {
             boolean status = database.create();
             log.info(status ? "Arango Database (" + database.name() + ") is created." : "ERROR : To create Arango Database (" + database.name() + ").");
         }
+        this.auditLog = auditLog;
     }
 
-    public ArangoAuditLog getAuditLogEvent() {
-        return auditLogEvent;
+    public ArangodbAuditLog getArangodbAuditLog() {
+        return auditLog;
     }
 
     public ArangoCollection getCollection(String name) {
@@ -69,7 +71,6 @@ public class ArangodbTransaction {
         return collection;
     }
 
-
     private String beginStreamTransaction(String collection) {
         Optional<StreamTransactionSet> optional = transactionSet.stream()
                 .filter(streamTransactionSet -> streamTransactionSet.getCollectionSet().contains(collection)).findFirst();
@@ -85,18 +86,22 @@ public class ArangodbTransaction {
 
     public void abortStreamTransaction() {
         transactionSet.forEach(stream -> database.abortStreamTransaction(stream.getId()));
+        auditLog.abortStreamTransaction();
     }
 
     public void commitStreamTransaction() {
         if(isCancelTransaction) {
             abortStreamTransaction();
+            auditLog.abortStreamTransaction();
         } else {
             transactionSet.forEach(stream -> database.commitStreamTransaction(stream.getId()));
+            auditLog.commitStreamTransaction();
         }
     }
 
     public void cancelStreamTransaction() {
         this.isCancelTransaction = true;
+        auditLog.cancelStreamTransaction();
     }
 
     public String getDatabaseName() {
@@ -113,7 +118,7 @@ public class ArangodbTransaction {
         RawBytes rawBytes = ArangodbFactory.getRawBytes(object);
         DocumentEntity entity = collection.insertDocument(rawBytes, options, RawBytes.class);
         T result = ArangodbFactory.getNewInstance(entity, object);
-        auditLogEvent.insert(name, result);
+        auditLog.logForInsert(result);
         return result;
     }
 
@@ -130,7 +135,7 @@ public class ArangodbTransaction {
             RawBytes rawBytes = ArangodbFactory.getRawBytes(object);
             DocumentEntity entity = collection.insertDocument(rawBytes, createOptions, RawBytes.class);
             T result = ArangodbFactory.getNewInstance(entity, object);
-            auditLogEvent.insert(name, result);
+            auditLog.logForInsert(result);
             resultList.add(result);
         });
         return resultList;
@@ -153,7 +158,7 @@ public class ArangodbTransaction {
         ArangoCollection collection = getCollection(name);
         RawBytes rawBytes = ArangodbFactory.getRawBytes(object);
         DocumentUpdateEntity<RawBytes> entity = collection.updateDocument(entityId.getKey(), rawBytes, createUpdateOptions(name));
-        auditLogEvent.update(name, ArangodbFactory.getObject(entity.getOld(), tClass));
+        auditLog.logForUpdate(ArangodbFactory.getObject(entity.getOld(), tClass));
         return ArangodbFactory.getObject(entity.getNew(), tClass);
     }
 
@@ -174,7 +179,7 @@ public class ArangodbTransaction {
             EntityIdentity adbEntity = (EntityIdentity)obj;
             RawBytes rawBytes = ArangodbFactory.getRawBytes(object);
             DocumentUpdateEntity<RawBytes> entity = collection.updateDocument(adbEntity.getKey(), rawBytes, updateOptions);
-            auditLogEvent.update(name, ArangodbFactory.getObject(entity.getOld(), tClass));
+            auditLog.logForUpdate(ArangodbFactory.getObject(entity.getOld(), tClass));
             resultList.add(ArangodbFactory.getObject(entity.getNew(), tClass));
         });
         return resultList;
@@ -197,7 +202,7 @@ public class ArangodbTransaction {
         DocumentDeleteEntity<RawBytes> entity = collection.deleteDocument(
                 baseEntity.getKey(), createDeleteOptions(name), RawBytes.class);
         Object old = ArangodbFactory.getObject(entity.getOld(), tClass);
-        auditLogEvent.delete(name, old);
+        auditLog.logForDelete(old);
         return (T)old;
     }
 
@@ -219,8 +224,8 @@ public class ArangodbTransaction {
             EntityIdentity adbEntity = (EntityIdentity)obj;
             DocumentDeleteEntity<RawBytes> entity = collection.deleteDocument(adbEntity.getKey(), deleteOpn, RawBytes.class);
             Object old = ArangodbFactory.getObject(entity.getOld(), tClass);
-            auditLogEvent.delete(name, old);
-            resultList.add((T)old);
+            auditLog.logForDelete(old);
+            resultList.add((T) old);
         });
         return resultList;
     }
@@ -267,7 +272,7 @@ public class ArangodbTransaction {
         if(!isForTransaction) {
             return getDocument(entity, type);
         }
-        if(entity == null) {
+        if (entity == null) {
             return null;
         }
         String name = ArangodbFactory.getCollectionName(type);
@@ -276,36 +281,52 @@ public class ArangodbTransaction {
         return (T) ArangodbFactory.getTypeObject(document, type);
     }
 
-    public <T> ArangoCursor<T>  query(ArangodbQueryBuilder builder) {
-        return query(builder.toString(), builder.getType(), builder.getParameters());
+    public <T> ArangoCursor<T> query(ArangodbQueryBuilder builder) {
+        return query(builder.getType(), builder.toString(), builder.getParameters());
+    }
+
+    public <T> ArangoCursor<T> query(String query, Class<?> type) {
+        return query(type, query, null);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> ArangoCursor<T> query(String query, Class<?> type, Map<String, Object> parameters) {
-        return (ArangoCursor<T>)database.query(query, type, parameters);
+    public <T> ArangoCursor<T> query(Class<?> type, String query, Map<String, Object> parameters) {
+        return (ArangoCursor<T>) database.query(query, type, parameters);
+    }
+
+    public <T> T fetch(ArangodbQueryBuilder builder) {
+        return fetch(builder.getType(), builder.toString(), builder.getParameters());
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T fetchFirst(ArangodbQueryBuilder builder) {
+    public <T> T fetch(Class<?> type, String query, Map<String, Object> parameters) {
         Object result;
-        try (ArangoCursor<MessageProperty> cursor  = query(builder.toString(), builder.getType(), builder.getParameters())){
+        try (ArangoCursor<T> cursor = query(type, query, parameters)) {
             Optional<?> optional = cursor.stream().findFirst();
             result = optional.orElse(null);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-        return (T)result;
+        return (T) result;
+    }
+
+    public <T> List<T> fetchAll(ArangodbQueryBuilder builder) {
+        return fetchAll(builder.getType(), builder.toString(), builder.getParameters());
     }
 
     @SuppressWarnings("unchecked")
-    public <T> List<T> fetchAll(ArangodbQueryBuilder builder) {
+    public <T> List<T> fetchAll(Class<?> type, String query, Map<String, Object> parameters) {
         List<T> resultList;
-        try (ArangoCursor<MessageProperty> cursor  = query(builder.toString(), builder.getType(), builder.getParameters())) {
-            resultList = (List<T>)cursor.stream().collect(Collectors.toList());
+        try (ArangoCursor<MessageProperty> cursor = query(type, query, parameters)) {
+            resultList = (List<T>) cursor.stream().collect(Collectors.toList());
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
         return resultList;
+    }
+
+    public <T> List<T> fetchAll(Class<?> type) {
+        return fetchAll(new ArangodbQueryBuilder(type).build());
     }
 
     static class StreamTransactionSet {

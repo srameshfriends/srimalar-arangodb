@@ -1,4 +1,4 @@
-package srimalar.arangodb.common;
+package srimalar.arangodb.util;
 
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
