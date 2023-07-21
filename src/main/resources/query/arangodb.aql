@@ -1,0 +1,9 @@
+//--<FETCH_BY_KEY,Fetch document collection by key.
+FOR x IN messages FILTER x.key == @key RETURN x
+//-->
+//--<FETCH_BY_ID,Fetch document collection by id.
+FOR x IN messages FILTER x.id == @id RETURN x
+//-->
+//--<FETCH_ALL,Fetch all document collection.
+FOR x IN messages RETURN x
+//-->

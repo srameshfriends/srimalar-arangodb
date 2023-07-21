@@ -71,6 +71,19 @@ public class ArangodbExecutor {
         return collection;
     }
 
+    public void setUniqueIndex(Class<?> clazz, String... fields) {
+        String name = ArangodbFactory.getCollectionName(clazz);
+        ArangoCollection collection = getOrCreateCollection(name);
+        collection.ensurePersistentIndex(Arrays.asList(fields), new PersistentIndexOptions().unique(true));
+    }
+
+    public void dropCollection(String name) {
+        ArangoCollection collection = database.collection(name);
+        if (collection.exists()) {
+            collection.drop();
+        }
+    }
+
     private String beginStreamTransaction(String collection) {
         Optional<StreamTransactionSet> optional = transactionSet.stream()
                 .filter(streamTransactionSet -> streamTransactionSet.getCollectionSet().contains(collection)).findFirst();
@@ -118,7 +131,7 @@ public class ArangodbExecutor {
         RawBytes rawBytes = ArangodbFactory.getRawBytes(object);
         DocumentEntity entity = collection.insertDocument(rawBytes, options, RawBytes.class);
         T result = ArangodbFactory.getNewInstance(entity, object);
-        auditLog.logForInsert(result);
+        auditLog.logForInsert(name, ArangodbFactory.getJsonObjectNode(result));
         return result;
     }
 
@@ -135,7 +148,7 @@ public class ArangodbExecutor {
             RawBytes rawBytes = ArangodbFactory.getRawBytes(object);
             DocumentEntity entity = collection.insertDocument(rawBytes, createOptions, RawBytes.class);
             T result = ArangodbFactory.getNewInstance(entity, object);
-            auditLog.logForInsert(result);
+            auditLog.logForInsert(name, result);
             resultList.add(result);
         });
         return resultList;
@@ -158,7 +171,7 @@ public class ArangodbExecutor {
         ArangoCollection collection = getCollection(name);
         RawBytes rawBytes = ArangodbFactory.getRawBytes(object);
         DocumentUpdateEntity<RawBytes> entity = collection.updateDocument(entityId.getKey(), rawBytes, createUpdateOptions(name));
-        auditLog.logForUpdate(ArangodbFactory.getObject(entity.getOld(), tClass));
+        auditLog.logForUpdate(name, ArangodbFactory.getObject(entity.getOld(), tClass));
         return ArangodbFactory.getObject(entity.getNew(), tClass);
     }
 
@@ -179,7 +192,7 @@ public class ArangodbExecutor {
             EntityIdentity adbEntity = (EntityIdentity)obj;
             RawBytes rawBytes = ArangodbFactory.getRawBytes(object);
             DocumentUpdateEntity<RawBytes> entity = collection.updateDocument(adbEntity.getKey(), rawBytes, updateOptions);
-            auditLog.logForUpdate(ArangodbFactory.getObject(entity.getOld(), tClass));
+            auditLog.logForUpdate(name, ArangodbFactory.getObject(entity.getOld(), tClass));
             resultList.add(ArangodbFactory.getObject(entity.getNew(), tClass));
         });
         return resultList;
@@ -202,7 +215,7 @@ public class ArangodbExecutor {
         DocumentDeleteEntity<RawBytes> entity = collection.deleteDocument(
                 baseEntity.getKey(), createDeleteOptions(name), RawBytes.class);
         Object old = ArangodbFactory.getObject(entity.getOld(), tClass);
-        auditLog.logForDelete(old);
+        auditLog.logForDelete(name, old);
         return (T)old;
     }
 
@@ -224,7 +237,7 @@ public class ArangodbExecutor {
             EntityIdentity adbEntity = (EntityIdentity)obj;
             DocumentDeleteEntity<RawBytes> entity = collection.deleteDocument(adbEntity.getKey(), deleteOpn, RawBytes.class);
             Object old = ArangodbFactory.getObject(entity.getOld(), tClass);
-            auditLog.logForDelete(old);
+            auditLog.logForDelete(name, old);
             resultList.add((T) old);
         });
         return resultList;
@@ -281,8 +294,8 @@ public class ArangodbExecutor {
         return (T) ArangodbFactory.getTypeObject(document, type);
     }
 
-    public <T> ArangoCursor<T> query(ArangodbQueryBuilder builder) {
-        return query(builder.getType(), builder.toString(), builder.getParameters());
+    public <T> ArangoCursor<T> query(String query, Class<?> type, Map<String, Object> parameters) {
+        return query(query, type, parameters);
     }
 
     public <T> ArangoCursor<T> query(String query, Class<?> type) {
@@ -294,7 +307,7 @@ public class ArangodbExecutor {
         return (ArangoCursor<T>) database.query(query, type, parameters);
     }
 
-    public <T> T fetch(ArangodbQueryBuilder builder) {
+    public <T> T fetch(ArangoQuery builder) {
         return fetch(builder.getType(), builder.toString(), builder.getParameters());
     }
 
@@ -310,7 +323,7 @@ public class ArangodbExecutor {
         return (T) result;
     }
 
-    public <T> List<T> fetchAll(ArangodbQueryBuilder builder) {
+    public <T> List<T> fetchAll(ArangoQuery builder) {
         return fetchAll(builder.getType(), builder.toString(), builder.getParameters());
     }
 
@@ -326,7 +339,7 @@ public class ArangodbExecutor {
     }
 
     public <T> List<T> fetchAll(Class<?> type) {
-        return fetchAll(new ArangodbQueryBuilder(type).build());
+        return fetchAll(new ArangoQuery(type));
     }
 
     static class StreamTransactionSet {

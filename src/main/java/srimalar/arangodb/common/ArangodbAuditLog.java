@@ -2,6 +2,7 @@ package srimalar.arangodb.common;
 
 import com.arangodb.ArangoCollection;
 import com.arangodb.ArangoDatabase;
+import com.arangodb.entity.BaseDocument;
 import com.arangodb.entity.DocumentEntity;
 import com.arangodb.entity.StreamTransactionEntity;
 import com.arangodb.model.DocumentCreateOptions;
@@ -16,7 +17,7 @@ public final class ArangodbAuditLog {
     private final String collectionName;
     private ArangoDatabase database;
     private String userName;
-    private boolean isCancelTransaction;
+    private boolean isCancelTransaction, ignoreInsert = true;
     private StreamTransactionEntity transactionEntity;
 
     public ArangodbAuditLog() {
@@ -37,28 +38,38 @@ public final class ArangodbAuditLog {
 
     }
 
+    public boolean isIgnoreInsert() {
+        return ignoreInsert;
+    }
+
+    public void setIgnoreInsert(boolean ignoreInsert) {
+        this.ignoreInsert = ignoreInsert;
+    }
+
     public void setUserName(String userName) {
         this.userName = userName;
     }
 
-    public void logForInsert(Object data) {
-        log("I", data);
+    public void logForInsert(String name, Object data) {
+        if (!ignoreInsert) {
+            log("I", name, data);
+        }
     }
 
-    public void logForUpdate(Object data) {
-        log("U", data);
+    public void logForUpdate(String name, Object data) {
+        log("U", name, data);
     }
 
-    public void logForDelete(Object data) {
-        log("D", data);
+    public void logForDelete(String name, Object data) {
+        log("D", name, data);
     }
 
-    private void log(String action, Object data) {
-        AuditLog auditLog = new AuditLog();
-        auditLog.setCreatedOn(LocalDateTime.now());
-        auditLog.setCreatedBy(userName);
-        auditLog.setAct(action);
-        auditLog.setData(data);
+    private void log(String action, String name, Object data) {
+        BaseDocument auditLog = new BaseDocument();
+        auditLog.addAttribute("log_on", LocalDateTime.now());
+        auditLog.addAttribute("log_by", userName);
+        auditLog.addAttribute("action", action);
+        auditLog.addAttribute(name, ArangodbFactory.getJsonObjectNode(data));
         log(auditLog);
     }
 
@@ -93,7 +104,7 @@ public final class ArangodbAuditLog {
         return database.name();
     }
 
-    public DocumentEntity log(AuditLog auditLog) {
+    public DocumentEntity log(BaseDocument auditLog) {
         ArangoCollection collection = getOrCreateCollection(collectionName);
         DocumentCreateOptions options = new DocumentCreateOptions().streamTransactionId(beginStreamTransaction());
         RawBytes rawBytes = ArangodbFactory.getRawBytes(auditLog);

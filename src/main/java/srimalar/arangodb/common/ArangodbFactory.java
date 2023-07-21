@@ -9,6 +9,7 @@ import com.arangodb.util.RawBytes;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +29,18 @@ import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
 public class ArangodbFactory {
+    private static final JacksonSerde JACKSON_SERDE = JacksonSerde.create(JsonMapper.builder().addModule(getJodaModule()).build());
     private static final ConcurrentMap<Class<?>, String> ENTITY_CLASS_MAP = new ConcurrentHashMap<>();
-    private static final JacksonSerde JACKSON_SERDE = JacksonSerde.create(JsonMapper.builder().addModule(new JodaModule()).build());
+
+    private static JodaModule getJodaModule() {
+        JodaModule jodaModule = new JodaModule();
+        jodaModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer());
+        jodaModule.addSerializer(LocalDate.class, new LocalDateSerializer());
+        jodaModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
+        jodaModule.addDeserializer(LocalDate.class, new LocalDateDeserializer());
+        return jodaModule;
+    }
+
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(getJavaTimeModule());
 
     public static JavaTimeModule getJavaTimeModule() {
@@ -95,10 +106,17 @@ public class ArangodbFactory {
             arangoEntity.setKey(entity.getKey());
             arangoEntity.setRev(entity.getRev());
         }
-        return (T)getNewInstance(obj);
+        return (T) getNewInstance(obj);
     }
 
     public static Object getNewInstance(Object obj) {
         return JACKSON_SERDE.deserialize(JACKSON_SERDE.serialize(obj), obj.getClass());
+    }
+
+    public static ObjectNode getJsonObjectNode(Object obj) {
+        if (obj instanceof ObjectNode node) {
+            return node;
+        }
+        return JACKSON_SERDE.deserialize(JACKSON_SERDE.serialize(obj), ObjectNode.class);
     }
 }

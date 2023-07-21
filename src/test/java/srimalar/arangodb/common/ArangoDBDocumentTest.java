@@ -4,6 +4,13 @@ import com.arangodb.ArangoDB;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import srimalar.arangodb.util.AQLQueryMap;
+
+import java.io.IOException;
+import java.util.List;
 
 public class ArangoDBDocumentTest {
     private static ArangodbExecutor transaction;
@@ -24,11 +31,41 @@ public class ArangoDBDocumentTest {
     }
 
     @Test
-    public void insert() {
-        /*System.out.println(" ----------------- DOCUMENT ---------------- ");
-        MessageProperty property = ArangoDBTest.getInstance("2043863", null);
-        MessageProperty entity = transaction.getDocument(property);
-        System.out.println(entity);*/
+    public void findDocument() {
+        System.out.println(" ----------------- DOCUMENT ---------------- ");
+        Resource resource;
+        try {
+            ClassPathResource classPathResource = new ClassPathResource("query/arangodb.aql");
+            resource = new FileSystemResource(classPathResource.getFile());
+            System.out.println(resource);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+        AQLQueryMap.set(List.of(resource));
+        //
+        MessageProperty property = ArangoDBTest.getInstance("2152260", null);
+        property = transaction.getDocument(property);
+        System.out.println(property);
+        ArangoQuery arangoQuery = new ArangoQuery(MessageProperty.class);
+        arangoQuery.setQuery(AQLQueryMap.getQuery("FETCH_BY_KEY"));
+        arangoQuery.put("@key", "2152260");
+        System.out.println(arangoQuery);
+      /*  MessageProperty pro = transaction.fetch(builder);
+        System.out.println(pro);
+        List<MessageProperty> entity = transaction.fetchAll(MessageProperty.class);
+        if(entity.isEmpty()) {
+            System.out.println("sssssssssssssssssssssssssssssssssssssssssssssssssssss");
+        } else {
+            System.out.println(entity.get(0));
+        }*/
+
+        /*String query = "FOR t IN firstCollection FILTER t.name == @name RETURN t";
+        Map<String, Object> bindVars = Collections.singletonMap("name", "Homer");
+        ArangoCursor<BaseDocument> cursor = arangoDB.db(dbName).query(query, bindVars, null, BaseDocument.class);
+        cursor.forEachRemaining(aDocument -> {
+            System.out.println("Key: " + aDocument.getKey());
+        });*/
+
         errorCount -= 1;
     }
 

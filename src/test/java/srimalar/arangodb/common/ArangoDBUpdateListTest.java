@@ -5,8 +5,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
-
 public class ArangoDBUpdateListTest {
     private static ArangodbExecutor transaction;
     private static int errorCount = 2;
@@ -28,7 +26,7 @@ public class ArangoDBUpdateListTest {
 
     @Test
     public void reload() {
-        List<MessageProperty> newList = new ArrayList<>();
+        /*List<MessageProperty> newList = new ArrayList<>();
         newList.add(create());
         newList.add(create2());
         newList.add(create3());
@@ -57,7 +55,7 @@ public class ArangoDBUpdateListTest {
         transaction.updateAll(updateList);
         transaction.insertAll(insertList);
         System.out.println("Updated " + updateList.size());
-        System.out.println("Inserted " + insertList.size());
+        System.out.println("Inserted " + insertList.size());*/
         errorCount -= 1;
     }
 

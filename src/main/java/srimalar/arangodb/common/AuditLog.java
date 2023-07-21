@@ -24,9 +24,6 @@ public class AuditLog extends ArangodbEntity {
     @JsonProperty("act")
     private String act;
 
-    @JsonProperty
-    private Object data;
-
     public LocalDateTime getCreatedOn() {
         return createdOn;
     }
@@ -49,13 +46,5 @@ public class AuditLog extends ArangodbEntity {
 
     public void setAct(String act) {
         this.act = act;
-    }
-
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(Object data) {
-        this.data = data;
     }
 }

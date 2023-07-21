@@ -6,6 +6,12 @@
 * The transaction life cycle manually need to be call (commitStreamTransaction) or (abortStreamTransaction)
 * Make sure the operation will be completed otherwise it will cause unknown issues of your database transactions.
 
+##### 2023-07-21
+
+- Arango queries map support added.
+- Insert audit log default setting enabled to ignored insert.
+- drop collection method added.
+
 ##### 2023-06-04
 
 - Message property & Message Cache model updated
