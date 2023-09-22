@@ -234,13 +234,18 @@ public class ArangodbExecutor {
         DocumentDeleteOptions deleteOpn = createDeleteOptions(name);
         List<T> resultList = new ArrayList<>();
         objectList.forEach((Consumer<Object>) obj -> {
-            EntityIdentity adbEntity = (EntityIdentity)obj;
+            EntityIdentity adbEntity = (EntityIdentity) obj;
             DocumentDeleteEntity<RawBytes> entity = collection.deleteDocument(adbEntity.getKey(), deleteOpn, RawBytes.class);
             Object old = ArangodbFactory.getObject(entity.getOld(), tClass);
             auditLog.logForDelete(name, old);
             resultList.add((T) old);
         });
         return resultList;
+    }
+
+    public <T> T findFirst(Class<?> cType) {
+        String name = ArangodbFactory.getCollectionName(cType);
+        return fetch(cType, "FOR x IN " + name + " SORT x.key LIMIT 1 RETURN x", null);
     }
 
     @SuppressWarnings("unchecked")
