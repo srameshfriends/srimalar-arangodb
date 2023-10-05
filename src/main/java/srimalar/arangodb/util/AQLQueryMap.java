@@ -36,6 +36,17 @@ public abstract class AQLQueryMap {
         }
     }
 
+    public static void set(Map<String, List<String>> resourceMap) {
+        Map<String, List<String>> fileNamesMap = new HashMap<>();
+        Map<String, AQLInfo> aqlINfoMap = new HashMap<>();
+        for (Map.Entry<String, List<String>> entry : resourceMap.entrySet()) {
+            log.info("Loading named queries from : " + entry.getKey());
+            List<String> nameList = extractQuery(aqlINfoMap, entry.getValue().listIterator(), entry.getKey());
+            fileNamesMap.put(entry.getKey(), nameList);
+        }
+        set(aqlINfoMap, fileNamesMap);
+    }
+
     public static Set<String> getFileNames() {
         return queryFileNamesMap.keySet();
     }
