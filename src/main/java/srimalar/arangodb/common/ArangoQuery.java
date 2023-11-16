@@ -44,6 +44,13 @@ public class ArangoQuery {
         return ArangoQuery.this;
     }
 
+    public ArangoQuery putAll(Map<String, Object> map) {
+        if (map != null) {
+            this.parameters.putAll(map);
+        }
+        return ArangoQuery.this;
+    }
+
     public Object remove(String name, Object param) {
         return this.parameters.remove(name);
     }
