@@ -1,12 +1,14 @@
 package srimalar.arangodb.common;
 
+import srimalar.arangodb.util.AQLBuilder;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class ArangoQuery {
     private final Class<?> type;
     private final String name;
-    private final Map<String, Object> parameters;
+    private Map<String, Object> parameters;
     private String query;
 
     public ArangoQuery(Class<?> type) {
@@ -17,7 +19,7 @@ public class ArangoQuery {
 
     public ArangoQuery(String query, Class<?> type, Map<String, Object> parameter) {
         this.name = ArangodbFactory.getCollectionName(type);
-        this.parameters = parameter;
+        this.parameters = parameter == null ? new HashMap<>() : parameter;
         this.type = type;
         this.query = query;
     }
@@ -30,8 +32,29 @@ public class ArangoQuery {
         return query;
     }
 
-    public ArangoQuery setQuery(String query) {
+    public void setQuery(String query) {
         this.query = query;
+    }
+
+    public void setQuery(String query, Map<String, Object> param) {
+        this.query = query;
+        this.parameters = param == null ? new HashMap<>() : param;
+    }
+
+    public void setQuery(String query, String variable, Object param) {
+        this.query = query;
+        parameters.put(variable, param);
+    }
+
+    public ArangoQuery build(AQLBuilder builder) {
+        this.query = builder.toString();
+        this.parameters.putAll(builder.getParameter());
+        return ArangoQuery.this;
+    }
+
+    public ArangoQuery count(AQLBuilder builder) {
+        this.query = builder.getCountQuery();
+        this.parameters.putAll(builder.getParameter());
         return ArangoQuery.this;
     }
 

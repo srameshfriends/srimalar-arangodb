@@ -3,10 +3,12 @@ package srimalar.arangodb.converter;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.jackson.JsonComponent;
 
 import java.time.LocalDate;
 
+@Slf4j
 @JsonComponent
 public class LocalDateSerializer extends JsonSerializer<LocalDate> {
 
@@ -16,7 +18,7 @@ public class LocalDateSerializer extends JsonSerializer<LocalDate> {
             try {
                 generator.writeString(FormatConstant.DATE_FORMATTER.format(value));
             } catch (Exception ex) {
-                ex.printStackTrace();
+                log.warn("ERROR: LocalDateSerializer - serialize " + ex.getMessage());
             }
         }
     }
