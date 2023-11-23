@@ -175,6 +175,38 @@ public class ArangodbExecutor {
         return ArangodbFactory.getObject(entity.getNew(), tClass);
     }
 
+    public <T> T update(Class<?> tClass, String key, Map<String, Object> valueMap) {
+        if (tClass == null) {
+            throw new IllegalArgumentException("ERROR: Arangodb executor - update document class invalid.");
+        }
+        if (key == null || key.isBlank() || valueMap == null || valueMap.isEmpty()) {
+            return null;
+        }
+        String name = ArangodbFactory.getCollectionName(tClass);
+        StringBuilder builder = new StringBuilder();
+        builder.append("FOR x IN ").append(name).append(" FILTER x._key == '").append(key).append("' ");
+        String selectQry = builder + " RETURN x";
+        Object old = fetch(tClass, selectQry, null);
+        if (old == null) {
+            return null;
+        }
+        builder.append(" UPDATE x WITH { ");
+        StringBuilder fb = new StringBuilder();
+        Map<String, Object> param = new HashMap<>();
+        for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
+            fb.append(entry.getKey()).append(" : ").append("@v").append(entry.getKey()).append(",");
+            param.put("v" + entry.getKey(), entry.getValue());
+        }
+        builder.append(fb.substring(0, fb.length() - 1)).append(" } IN ").append(name);
+        database.query(builder.toString(), tClass, param);
+        Object newRecord = fetch(tClass, selectQry, null);
+        //
+        RawBytes oldRawBytes = ArangodbFactory.getRawBytes(old);
+        auditLog.logForUpdate(name, ArangodbFactory.getObject(oldRawBytes, tClass));
+        RawBytes newRawBytes = ArangodbFactory.getRawBytes(newRecord);
+        return ArangodbFactory.getObject(newRawBytes, tClass);
+    }
+
     public <T> List<T> updateAll(List<?> objectList) {
         if (objectList == null || objectList.isEmpty()) {
             return null;

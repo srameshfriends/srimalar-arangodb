@@ -1,6 +1,7 @@
 package srimalar.arangodb.util;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AQLFilter {
@@ -25,6 +26,32 @@ public class AQLFilter {
     public AQLFilter and(String query, String variable, Object param) {
         this.builder.append(" AND ").append(query).append(" == @").append(variable);
         this.parameter.put(variable, param);
+        return AQLFilter.this;
+    }
+
+    public AQLFilter in(String query, List<Object> array) {
+        if (array == null || array.isEmpty()) {
+            return AQLFilter.this;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Object obj : array) {
+            sb.append("'").append(obj).append("',");
+        }
+        String variable = sb.substring(0, sb.length() - 1);
+        this.builder.append(query).append(" IN [ ").append(variable).append(" ] ");
+        return AQLFilter.this;
+    }
+
+    public AQLFilter in(String query, Object[] array) {
+        if (array == null || 0 == array.length) {
+            return AQLFilter.this;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Object obj : array) {
+            sb.append("'").append(obj).append("',");
+        }
+        String variable = sb.substring(0, sb.length() - 1);
+        this.builder.append(query).append(" IN [ ").append(variable).append(" ] ");
         return AQLFilter.this;
     }
 
@@ -70,6 +97,8 @@ public class AQLFilter {
             query = query.replaceFirst("AND ", " FILTER ");
         } else if (query.startsWith("OR ")) {
             query = query.replaceFirst("OR ", " FILTER ");
+        } else if (!query.trim().startsWith("FILTER ") || !query.trim().startsWith("filter ")) {
+            query = " FILTER " + query;
         }
         return query;
     }
