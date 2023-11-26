@@ -6,8 +6,9 @@
 * The transaction life cycle manually need to be call (commitStreamTransaction) or (abortStreamTransaction)
 * Make sure the operation will be completed otherwise it will cause unknown issues of your database transactions.
 
-##### 2023-11-23
+##### 2023-11-26
 
+- Object utils removed due to not required.
 - ArangodbExecutor: update with fields name created.
 
 ##### 2023-10-05
