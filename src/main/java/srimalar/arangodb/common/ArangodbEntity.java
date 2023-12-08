@@ -76,6 +76,6 @@ public abstract class ArangodbEntity implements EntityIdentity {
     @Override
     @JsonIgnore
     public boolean isNew() {
-        return key == null;
+        return key == null || key.isBlank();
     }
 }
