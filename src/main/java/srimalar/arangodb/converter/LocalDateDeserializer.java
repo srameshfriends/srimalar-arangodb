@@ -19,7 +19,7 @@ public class LocalDateDeserializer extends JsonDeserializer<LocalDate> {
             try {
                 return LocalDate.parse(text, FormatConstant.DATE_FORMATTER);
             } catch (DateTimeParseException ex) {
-                ex.printStackTrace();
+                //ignore exception
             }
         }
         return null;

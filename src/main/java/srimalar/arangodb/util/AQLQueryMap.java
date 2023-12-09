@@ -1,6 +1,7 @@
 package srimalar.arangodb.util;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
@@ -8,8 +9,8 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Stream;
 
-@Slf4j
 public abstract class AQLQueryMap {
+    private static final Logger log = LoggerFactory.getLogger(AQLQueryMap.class);
     private static final String START_CHAR = "//--<", END_CHAR = "//-->", ESCAPE_CHAR = "//--!";
     private static Map<String, AQLInfo> namedQueryMap;
     private static Map<String, List<String>> queryFileNamesMap;
@@ -137,7 +138,7 @@ public abstract class AQLQueryMap {
                 sqlModel = new AQLInfo(nameDesc[0], nameDesc[1], fileName);
                 queryLines = new ArrayList<>();
             } else if (line.startsWith(END_CHAR) && sqlModel != null) {
-                if (0 < queryLines.size()) {
+                if (!queryLines.isEmpty()) {
                     StringBuilder builder = new StringBuilder();
                     queryLines.forEach(str -> builder.append(str).append(" "));
                     map.put(sqlModel.getName(), sqlModel.clone(builder.toString()));

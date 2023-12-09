@@ -4,15 +4,19 @@ import com.arangodb.serde.jackson.Id;
 import com.arangodb.serde.jackson.Key;
 import com.arangodb.serde.jackson.Rev;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
 public abstract class ArangodbEntity implements EntityIdentity {
     @Id
+    @JsonProperty("_id")
     private String id;
     @Key
+    @JsonProperty("_key")
     private String key;
     @Rev
+    @JsonProperty("_rev")
     private String rev;
 
     public ArangodbEntity() {

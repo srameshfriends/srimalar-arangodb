@@ -12,7 +12,8 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import srimalar.arangodb.converter.LocalDateDeserializer;
 import srimalar.arangodb.converter.LocalDateSerializer;
 import srimalar.arangodb.converter.LocalDateTimeDeserializer;
@@ -27,8 +28,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-@Slf4j
 public class ArangodbFactory {
+    private static final Logger logger = LoggerFactory.getLogger(ArangodbFactory.class);
     private static final JacksonSerde JACKSON_SERDE = JacksonSerde.create(JsonMapper.builder().addModule(getJodaModule()).build());
     private static final ConcurrentMap<Class<?>, String> ENTITY_CLASS_MAP = new ConcurrentHashMap<>();
 
@@ -70,7 +71,7 @@ public class ArangodbFactory {
         }
         JsonRootName rootName = clazz.getDeclaredAnnotation(JsonRootName.class);
         if(rootName == null) {
-            log.error("ERROR: Arango entity @JsonRootName annotation not found (" + clazz + ")");
+            logger.error("ERROR: Arango entity @JsonRootName annotation not found (" + clazz + ")");
             throw new RuntimeException("ERROR: Arango entity @JsonRootName annotation not found (" + clazz + ")");
         }
         if(rootName.value().isBlank()) {

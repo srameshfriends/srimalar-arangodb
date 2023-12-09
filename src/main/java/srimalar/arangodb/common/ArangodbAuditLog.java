@@ -7,13 +7,15 @@ import com.arangodb.entity.DocumentEntity;
 import com.arangodb.entity.StreamTransactionEntity;
 import com.arangodb.model.DocumentCreateOptions;
 import com.arangodb.util.RawBytes;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Slf4j
+
 public final class ArangodbAuditLog {
+    private static final Logger logger = LoggerFactory.getLogger(ArangodbAuditLog.class);
     private final String collectionName;
     private ArangoDatabase database;
     private String userName;
@@ -33,9 +35,8 @@ public final class ArangodbAuditLog {
         this.database = auditLogDatabase;
         if (!database.exists()) {
             boolean status = database.create();
-            log.info(status ? "Arango Log Database (" + database.name() + ") is created." : "ERROR : To create Arango Log Database (" + database.name() + ").");
+            logger.info(status ? "Arango Log Database (" + database.name() + ") is created." : "ERROR : To create Arango Log Database (" + database.name() + ").");
         }
-
     }
 
     public boolean isIgnoreInsert() {

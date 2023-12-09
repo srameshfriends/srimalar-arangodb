@@ -6,8 +6,8 @@ import com.arangodb.ArangoDatabase;
 import com.arangodb.entity.*;
 import com.arangodb.model.*;
 import com.arangodb.util.RawBytes;
-import io.vertx.core.impl.ConcurrentHashSet;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import srimalar.arangodb.util.CommonConstant;
@@ -28,25 +28,26 @@ import java.util.stream.Collectors;
  * @author Ramesh S
  * @since 1.0
  */
-@Slf4j
+
 @Component
 @Scope(value = CommonConstant.SCOPE_REQUEST)
 public class ArangodbExecutor {
-    private final ConcurrentHashSet<StreamTransactionSet> transactionSet;
+    private static final Logger logger = LoggerFactory.getLogger(ArangodbExecutor.class);
+    private final HashSet<StreamTransactionSet> transactionSet;
     private ArangoDatabase database;
     private boolean isCancelTransaction;
 
     private ArangodbAuditLog auditLog;
 
     public ArangodbExecutor() {
-        transactionSet = new ConcurrentHashSet<>();
+        transactionSet = new HashSet<>();
     }
 
     public void setDatabase(ArangoDatabase database, ArangodbAuditLog auditLog) {
         this.database = database;
         if (!database.exists()) {
             boolean status = database.create();
-            log.info(status ? "Arango Database (" + database.name() + ") is created." : "ERROR : To create Arango Database (" + database.name() + ").");
+            logger.info(status ? "Arango Database (" + database.name() + ") is created." : "ERROR : To create Arango Database (" + database.name() + ").");
         }
         this.auditLog = auditLog;
     }

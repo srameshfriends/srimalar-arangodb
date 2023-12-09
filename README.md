@@ -6,6 +6,11 @@
 * The transaction life cycle manually need to be call (commitStreamTransaction) or (abortStreamTransaction)
 * Make sure the operation will be completed otherwise it will cause unknown issues of your database transactions.
 
+##### 2023-12-08
+
+* Dependencies upgrade to latest.
+* Semantic versioning method as follows.
+
 ##### 2023-11-26
 
 - Object utils removed due to not required.

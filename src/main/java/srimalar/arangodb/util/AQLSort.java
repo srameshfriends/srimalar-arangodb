@@ -1,6 +1,7 @@
 package srimalar.arangodb.util;
 
 public class AQLSort {
+    public static final int LIMIT = 100;
     private final StringBuilder builder;
     private int limiting;
     private long offsetIndex;
@@ -19,16 +20,26 @@ public class AQLSort {
     }
 
     public AQLSort limit(int limit) {
+        if (1 > limit || 1000 < limit) {
+            limit = LIMIT;
+        }
+        this.isOffSet = true;
+        this.isLimit = true;
         this.limiting = limit;
-        isOffSet = true;
-        isLimit = true;
         return AQLSort.this;
     }
 
     public AQLSort limit(int limit, int defaultLimit) {
-        this.limiting = 0 == limit ? defaultLimit : limit;
-        isOffSet = true;
-        isLimit = true;
+        if (1 > limit || 1000 < limit) {
+            if (1 > defaultLimit || 1000 < defaultLimit) {
+                limit = LIMIT;
+            } else {
+                limit = defaultLimit;
+            }
+        }
+        this.limiting = limit;
+        this.isOffSet = true;
+        this.isLimit = true;
         return AQLSort.this;
     }
 
