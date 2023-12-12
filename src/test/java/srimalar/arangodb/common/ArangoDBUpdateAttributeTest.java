@@ -37,6 +37,6 @@ public class ArangoDBUpdateAttributeTest {
         param.put("locale", "IPO");
         param.put("value", "Field level update implement.");
 
-        transaction.update(MessageProperty.class, "2152486", param);
+        transaction.update(SampleModelADB.class, "2152486", param);
     }
 }

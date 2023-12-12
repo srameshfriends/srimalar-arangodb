@@ -43,29 +43,13 @@ public class ArangoDBDocumentTest {
         }
         AQLQueryMap.set(List.of(resource));
         //
-        MessageProperty property = ArangoDBTest.getInstance("2152260", null);
+        SampleModelADB property = ArangoDBTest.getInstance("2152260", null);
         property = transaction.getDocument(property);
         System.out.println(property);
-        ArangoQuery arangoQuery = new ArangoQuery(MessageProperty.class);
+        ArangoQuery arangoQuery = new ArangoQuery(SampleModelADB.class);
         arangoQuery.setQuery(AQLQueryMap.getQuery("FETCH_BY_KEY"));
         arangoQuery.put("@key", "2152260");
         System.out.println(arangoQuery);
-      /*  MessageProperty pro = transaction.fetch(builder);
-        System.out.println(pro);
-        List<MessageProperty> entity = transaction.fetchAll(MessageProperty.class);
-        if(entity.isEmpty()) {
-            System.out.println("sssssssssssssssssssssssssssssssssssssssssssssssssssss");
-        } else {
-            System.out.println(entity.get(0));
-        }*/
-
-        /*String query = "FOR t IN firstCollection FILTER t.name == @name RETURN t";
-        Map<String, Object> bindVars = Collections.singletonMap("name", "Homer");
-        ArangoCursor<BaseDocument> cursor = arangoDB.db(dbName).query(query, bindVars, null, BaseDocument.class);
-        cursor.forEachRemaining(aDocument -> {
-            System.out.println("Key: " + aDocument.getKey());
-        });*/
-
         errorCount -= 1;
     }
 

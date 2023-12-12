@@ -59,8 +59,8 @@ public class ArangoDBUpdateListTest {
         errorCount -= 1;
     }
 
-    private MessageProperty create() {
-        MessageProperty pro = new MessageProperty();
+    private SampleModelADB create() {
+        SampleModelADB pro = new SampleModelADB();
         pro.setId("messages/2164455");
         pro.setRev("_gAMlrRi---");
         pro.setKey("2164455");
@@ -70,16 +70,16 @@ public class ArangoDBUpdateListTest {
         return pro;
     }
 
-    private MessageProperty create2() {
-        MessageProperty pro = new MessageProperty();
+    private SampleModelADB create2() {
+        SampleModelADB pro = new SampleModelADB();
         pro.setLocale("en");
         pro.setName("This.is.ramesh");
         pro.setValue("This is Ramesh");
         return pro;
     }
 
-    private MessageProperty create3() {
-        MessageProperty pro = new MessageProperty();
+    private SampleModelADB create3() {
+        SampleModelADB pro = new SampleModelADB();
         pro.setId("messages/2164443");
         pro.setRev("_gAMlZ02---");
         pro.setKey("2164443");

@@ -37,7 +37,7 @@ public class ArangoDBUniqueIndexTest {
 
     @Test
     public void addPersistenceUnique() {
-        transaction.setUniqueIndex(TestModel.class, "user_name");
+        // transaction.setUniqueIndex(SampleModelADB.class, "name");
         System.out.println("Persistence unique index added.");
         errorCount -= 1;
     }

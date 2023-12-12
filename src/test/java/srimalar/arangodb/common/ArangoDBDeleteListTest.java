@@ -26,13 +26,13 @@ public class ArangoDBDeleteListTest {
     @Test
     public void deleteList() {
         /*System.out.println(" ----------------- DELETE LIST ---------------- ");
-        List<MessageProperty> proList = new ArrayList<>();
-        MessageProperty pro1 = ArangoDBTest.update("2049791", null);
+        List<SampleModelADB> proList = new ArrayList<>();
+        SampleModelADB pro1 = ArangoDBTest.update("2049791", null);
         proList.add(pro1);
-        MessageProperty pro2 = ArangoDBTest.update("2043864", null);
+        SampleModelADB pro2 = ArangoDBTest.update("2043864", null);
         proList.add(pro2);
-        List<MessageProperty>  result = transaction.deleteAll(proList);
-        result.forEach(new Consumer<MessageProperty>() {
+        List<SampleModelADB>  result = transaction.deleteAll(proList);
+        result.forEach(new Consumer<SampleModelADB>() {
             @Override
             public void accept(MessageProperty mes) {
                 System.out.println(mes);

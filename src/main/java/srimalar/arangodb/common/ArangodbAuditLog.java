@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-
 public final class ArangodbAuditLog {
     private static final Logger logger = LoggerFactory.getLogger(ArangodbAuditLog.class);
     private final String collectionName;

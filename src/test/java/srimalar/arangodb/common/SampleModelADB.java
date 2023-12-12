@@ -1,18 +1,73 @@
 package srimalar.arangodb.common;
 
+import com.arangodb.serde.jackson.Id;
+import com.arangodb.serde.jackson.Key;
+import com.arangodb.serde.jackson.Rev;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import srimalar.core.model.MessageEntity;
+import srimalar.core.model.ToStringBuilder;
 
 import java.util.Objects;
 
 @JsonRootName("messages")
-public class MessageProperty extends ArangodbEntity {
+public class SampleModelADB implements MessageEntity {
+    @Id
+    @JsonProperty("_id")
+    private String id;
+    @Key
+    @JsonProperty("_key")
+    private String key;
+    @Rev
+    @JsonProperty("_rev")
+    private String rev;
+
     @JsonProperty("locale")
     private String locale;
     @JsonProperty("name")
     private String name;
     @JsonProperty("value")
     private String value;
+
+    public SampleModelADB() {
+    }
+
+    public SampleModelADB(String key, String id, String rev) {
+        this.key = key;
+        this.id = id;
+        this.rev = rev;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    @Override
+    public String getKey() {
+        return key;
+    }
+
+    @Override
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    @Override
+    public String getRev() {
+        return rev;
+    }
+
+    @Override
+    public void setRev(String rev) {
+        this.rev = rev;
+    }
 
     public String getLocale() {
         return locale;
@@ -39,6 +94,12 @@ public class MessageProperty extends ArangodbEntity {
     }
 
     @Override
+    @JsonIgnore
+    public boolean isNew() {
+        return key == null || key.isBlank();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -46,7 +107,7 @@ public class MessageProperty extends ArangodbEntity {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        MessageProperty prop = (MessageProperty) obj;
+        SampleModelADB prop = (SampleModelADB) obj;
         return Objects.equals(prop.locale, locale) && Objects.equals(prop.name, name) && Objects.equals(prop.value, value);
     }
 

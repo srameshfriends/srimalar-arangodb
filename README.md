@@ -6,6 +6,10 @@
 * The transaction life cycle manually need to be call (commitStreamTransaction) or (abortStreamTransaction)
 * Make sure the operation will be completed otherwise it will cause unknown issues of your database transactions.
 
+##### 2023-12-12
+
+* Classes removed, if not used by ArangoDB module.
+
 ##### 2023-12-08
 
 * Dependencies upgrade to latest.

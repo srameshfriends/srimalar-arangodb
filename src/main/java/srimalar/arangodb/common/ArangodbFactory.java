@@ -14,10 +14,11 @@ import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import srimalar.arangodb.converter.LocalDateDeserializer;
-import srimalar.arangodb.converter.LocalDateSerializer;
-import srimalar.arangodb.converter.LocalDateTimeDeserializer;
-import srimalar.arangodb.converter.LocalDateTimeSerializer;
+import srimalar.core.converter.LocalDateDeserializer;
+import srimalar.core.converter.LocalDateSerializer;
+import srimalar.core.converter.LocalDateTimeDeserializer;
+import srimalar.core.converter.LocalDateTimeSerializer;
+import srimalar.core.model.EntityIdentity;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -102,10 +103,10 @@ public class ArangodbFactory {
 
     @SuppressWarnings("unchecked")
     public static <T> T getNewInstance(DocumentEntity entity, Object obj) {
-        if (obj instanceof ArangodbEntity arangoEntity) {
-            arangoEntity.setId(entity.getId());
-            arangoEntity.setKey(entity.getKey());
-            arangoEntity.setRev(entity.getRev());
+        if (obj instanceof EntityIdentity identity) {
+            identity.setId(entity.getId());
+            identity.setKey(entity.getKey());
+            identity.setRev(entity.getRev());
         }
         return (T) getNewInstance(obj);
     }

@@ -26,10 +26,10 @@ public class ArangoDBUpdateTest {
     @Test
     public void updateTest() {
         System.out.println(" ----------------- UPDATE ---------------- ");
-        MessageProperty property = ArangoDBTest.getInstance("2151940", null);
+        SampleModelADB property = ArangoDBTest.getInstance("2151940", null);
         property.setValue("This is Thirunallar Temple");
         property.setName("thirunallar");
-        MessageProperty entity = transaction.update(property);
+        SampleModelADB entity = transaction.update(property);
         System.out.println(entity);
         System.out.println(" ----------------- AUDIT ---------------- ");
         errorCount -= 1;

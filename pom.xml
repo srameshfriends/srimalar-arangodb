@@ -22,9 +22,15 @@
         <spring-boot>3.2.0</spring-boot>
         <reactor-core>3.6.0</reactor-core>
         <junit-jupiter>5.10.1</junit-jupiter>
+        <srimalar>2.0.0</srimalar>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>srimalar</groupId>
+            <artifactId>srimalar-core</artifactId>
+            <version>${srimalar}</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.arangodb/arangodb-java-driver -->
         <dependency>
             <groupId>com.arangodb</groupId>

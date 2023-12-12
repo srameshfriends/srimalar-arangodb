@@ -32,7 +32,7 @@ public class ArangoDBInsertTest {
         auditLog.setAct("U");
         auditLog.setRef("2053492");*/
         //
-        MessageProperty property = new MessageProperty();
+        SampleModelADB property = new SampleModelADB();
         property.setLocale("en");
         property.setValue("Audit Log");
         property.setName("auditLog");/*
@@ -40,7 +40,7 @@ public class ArangoDBInsertTest {
         property.setId("messages/2053492");
         property.setRev("_f9Ep3Ju---");*/
         //
-        MessageProperty entity = transaction.insert(property);
+        SampleModelADB entity = transaction.insert(property);
         System.out.println(" ----------------- INSERTED ---------------- ");
         System.out.println(entity);
         errorCount -= 1;

@@ -25,7 +25,7 @@ public class ArangoDBDeleteTest {
 
     @Test
     public void delete() {
-        /*MessageProperty property = ArangoDBTest.getInstance("2043862", null);
+        /*SampleModelADB property = ArangoDBTest.getInstance("2043862", null);
         System.out.println(property);
 
         MessageProperty entity = transaction.delete(property);

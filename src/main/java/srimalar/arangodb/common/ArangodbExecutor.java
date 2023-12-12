@@ -10,7 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import srimalar.arangodb.util.CommonConstant;
+import srimalar.core.model.EntityIdentity;
+import srimalar.core.model.FormatConstant;
 
 import java.io.IOException;
 import java.util.*;
@@ -30,7 +31,7 @@ import java.util.stream.Collectors;
  */
 
 @Component
-@Scope(value = CommonConstant.SCOPE_REQUEST)
+@Scope(value = FormatConstant.SCOPE_REQUEST)
 public class ArangodbExecutor {
     private static final Logger logger = LoggerFactory.getLogger(ArangodbExecutor.class);
     private final HashSet<StreamTransactionSet> transactionSet;
@@ -128,6 +129,9 @@ public class ArangodbExecutor {
         }
         String name = ArangodbFactory.getCollectionName(object.getClass());
         ArangoCollection collection = getOrCreateCollection(name);
+        System.out.println("getCollectionName : " + name);
+        System.out.println(object);
+        System.out.println("------------------------------------------------");
         DocumentCreateOptions options = new DocumentCreateOptions().streamTransactionId(beginStreamTransaction(name));
         RawBytes rawBytes = ArangodbFactory.getRawBytes(object);
         DocumentEntity entity = collection.insertDocument(rawBytes, options, RawBytes.class);
@@ -368,7 +372,7 @@ public class ArangodbExecutor {
     @SuppressWarnings("unchecked")
     public <T> List<T> fetchAll(Class<?> type, String query, Map<String, Object> parameters) {
         List<T> resultList;
-        try (ArangoCursor<MessageProperty> cursor = query(type, query, parameters)) {
+        try (ArangoCursor<T> cursor = query(type, query, parameters)) {
             resultList = (List<T>) cursor.stream().collect(Collectors.toList());
         } catch (IOException ex) {
             throw new RuntimeException(ex);
